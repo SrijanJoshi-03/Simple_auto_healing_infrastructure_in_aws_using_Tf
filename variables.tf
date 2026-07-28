@@ -43,7 +43,7 @@ variable "subnet" {
       availability_zone       = "us-east-2b"
       map_public_ip_on_launch = true
       tags = {
-        "Name"    = "Private_subnet_B"
+        "Name"    = "Public_subnet_B"
         "Project" = "assesment_global_360"
       }
     }
@@ -51,13 +51,29 @@ variable "subnet" {
 }
 
 variable "internet_gw" {
-    type = object({
-        tags = map(string)
-    })
-    default = {
-        tags = {
-            Name    = "terraform-igw"
-            Project = "assesment_global_360"
-        }
+  type = object({
+    tags = map(string)
+  })
+  default = {
+    tags = {
+      Name    = "terraform-igw"
+      Project = "assesment_global_360"
     }
+  }
+}
+
+variable "alb" {
+  type = object({
+    name        = string
+    description = string
+    tags        = map(string)
+  })
+  default = {
+    name        = "terraform-alb"
+    description = "terraform alb description"
+    tags = {
+      Name    = "terraform-alb"
+      Project = "assesment_global_360"
+    }
+  }
 }
