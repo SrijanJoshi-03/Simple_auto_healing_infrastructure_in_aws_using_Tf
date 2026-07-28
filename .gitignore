@@ -1,0 +1,31 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (They contain secrets and live state details)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*
+
+# Exclude all variable files with actual values/secrets
+*.tfvars
+*.tfvars.json
+
+# Override files if you use them locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include a template if you want to show others what variables to fill out
+!example.tfvars
+
+backend.tf
+variable.tf
+version.tf
+terraform.tfvars
+.terraform.lock.hcl
+locals.tf
+output.tf
