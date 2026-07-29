@@ -112,3 +112,30 @@ variable "lb_sg_rules" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+variable "key_pair_name" {
+  type    = string
+  default = "terraform-key"
+}
+
+variable "asg" {
+
+}
+
+variable "launch_template" {
+
+}
+
+variable "http_proxy" {
+
+}
+variable "https_proxy" {
+
+
+}
+variable "no_proxy" {
+
+}
+variable "user_data" {
+
+}
