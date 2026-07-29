@@ -1,5 +1,13 @@
 variable "asg_config" {
-  
+  type = object({
+  name                      = string
+  max_size                  = number
+  min_size                  = number
+  desired_capacity          = number
+  health_check_grace_period = number
+  health_check_type         = string
+  force_delete              = bool
+  })
 }
 variable "vpc_id" {
   type = string

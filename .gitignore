@@ -29,3 +29,4 @@ terraform.tfvars
 .terraform.lock.hcl
 locals.tf
 output.tf
+varibles.tf
