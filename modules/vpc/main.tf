@@ -53,3 +53,14 @@ resource "aws_route_table_association" "tf_igw_route" {
     subnet_id = aws_subnet.terraform_subnets[each.key].id
     depends_on = [aws_subnet.terraform_subnets, aws_route_table.terraform_public_route_table]
 }
+
+resource "aws_security_group" "tf_ec2_sg" {
+    name = var.sg_config.name
+    description = var.sg_config.description
+    vpc_id = aws_vpc.terraform_vpc.id
+    tags = {
+        Name = var.sg_config.tags.Name
+        Project = var.sg_config.tags.Project
+    }
+    depends_on = [aws_vpc.terraform_vpc]
+}

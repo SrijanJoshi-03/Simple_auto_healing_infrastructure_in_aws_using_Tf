@@ -66,14 +66,49 @@ variable "alb" {
   type = object({
     name        = string
     description = string
+    internal    = bool
+    type        = string
     tags        = map(string)
   })
   default = {
     name        = "terraform-alb"
-    description = "terraform alb description"
+    internal    = false
+    type        = "application"
+    description = "terraform internet facing alb"
     tags = {
       Name    = "terraform-alb"
       Project = "assesment_global_360"
     }
+  }
+}
+
+variable "ec2_sg" {
+  type = object({
+    name        = string
+    description = string
+    tags        = map(string)
+  })
+  default = {
+    name        = "terraform-sg"
+    description = "terraform sg for ec2 instances"
+    tags = {
+      Name    = "terraform-sg"
+      Project = "assesment_global_360"
+    }
+  }
+}
+
+variable "lb_sg_rules" {
+  type = object({
+    from_port   = string
+    to_port     = string
+    protocol    = string
+    cidr_blocks = list(string)
+  })
+  default = {
+    from_port   = "80"
+    to_port     = "80"
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }

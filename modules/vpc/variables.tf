@@ -21,3 +21,12 @@ variable "igw_config"{
       tags = map(string) 
     })
 }
+
+variable "sg_config" {
+  type = object({
+    name = string
+    description= string
+    tags = map(string)
+  })
+  
+}
