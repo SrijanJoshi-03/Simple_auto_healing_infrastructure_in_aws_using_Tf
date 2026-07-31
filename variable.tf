@@ -30,7 +30,7 @@ variable "subnet" {
     "Public_subnet_A" = {
       name                    = "Public_subnet_A"
       cidr_block              = "10.16.0.0/20"
-      availability_zone       = "us-east-2a"
+      availability_zone       = "us-east-1a"
       map_public_ip_on_launch = true
       tags = {
         "Name"    = "Public_subnet_B"
@@ -40,7 +40,7 @@ variable "subnet" {
     "Public_subnet_B" = {
       name                    = "Public_subnet_B"
       cidr_block              = "10.16.16.0/20"
-      availability_zone       = "us-east-2b"
+      availability_zone       = "us-east-1b"
       map_public_ip_on_launch = true
       tags = {
         "Name"    = "Public_subnet_B"
