@@ -1,6 +1,6 @@
 output "target_group_arns" {
   description = "Target group ARN(s) for the ASG to attach to"
-  value = [aws_alb.terraform_lb.arn]
+  value = [aws_lb_target_group.tf_tg.arn]
 }
 output "dns_name" {
   description = "Public DNS name of the ALB - hit this to see the page"
