@@ -25,3 +25,17 @@ variable "sg_rules" {
     cidr_blocks = list(string)
   })
 }
+
+variable "target_group_config" {
+  type = object({
+    protocol = string
+    port = number
+    target_type = string
+    health_check = map(string)
+    action = string
+  })
+}
+variable "enable_deletion_protection" {
+  type    = bool
+  default = false
+}

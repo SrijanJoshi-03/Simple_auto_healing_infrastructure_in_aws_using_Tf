@@ -1,3 +1,21 @@
+resource "tls_private_key" "ec2_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+
+resource "aws_key_pair" "ec2_key_pair" {
+  key_name   = var.key_config
+  public_key = tls_private_key.ec2_key.public_key_openssh
+}
+
+
+resource "local_file" "private_key" {
+  content         = tls_private_key.ec2_key.private_key_pem
+  filename        = "${path.module}/my-ec2-key.pem"
+  file_permission = "0400"
+}
+
 
 resource "aws_iam_role" "ec2_ecr_role" {
   name_prefix = "ec2-ecr-read-role-"
@@ -59,10 +77,15 @@ resource "aws_launch_template" "tf_launch_template" {
             encrypted = true
         }
     }
-    key_name = var.key_config
+    key_name = aws_key_pair.ec2_key_pair.key_name
     update_default_version = true
     tags = {
         Name = "tf_launch_template"
     }
-    user_data = base64encode(var.user_data)
+  user_data = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl", {
+    region     = var.region
+    account_id = var.account_id
+    image_name = var.image_name
+    image_tag  = var.image_tag
+  }))
 }

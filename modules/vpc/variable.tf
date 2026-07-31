@@ -27,6 +27,5 @@ variable "sg_config" {
     name = string
     description= string
     tags = map(string)
-  })
-  
+  }) 
 }

@@ -63,4 +63,4 @@ resource "aws_security_group" "tf_ec2_sg" {
         Project = var.sg_config.tags.Project
     }
     depends_on = [aws_vpc.terraform_vpc]
-}
+    }

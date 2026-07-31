@@ -9,9 +9,7 @@ variable "asg_config" {
   force_delete              = bool
   })
 }
-variable "vpc_id" {
-  type = string
-}
+
 variable "subnet_ids" {
   type = list(string)
 }
@@ -24,4 +22,9 @@ variable "launch_template" {
 }
 variable "target_group_arns" {
   type = list(string)
+}
+
+variable "project_tag" {
+  type    = string
+  default = "assessment_global_360"
 }

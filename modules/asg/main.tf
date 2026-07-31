@@ -1,21 +1,26 @@
 resource "aws_autoscaling_group" "tf_asg" {
-  name                      = "tf-asg"
-  max_size                  = 3
-  min_size                  = 1
-  desired_capacity          = 2
-  health_check_grace_period = 300
-  health_check_type         = "ELB"
-  force_delete              = true
+  name                       = var.asg_config.name
+  max_size                   = var.asg_config.max_size
+  min_size                   = var.asg_config.min_size
+  desired_capacity           = var.asg_config.desired_capacity
+  health_check_grace_period  = var.asg_config.health_check_grace_period
+  health_check_type          = var.asg_config.health_check_type
+  force_delete                = var.asg_config.force_delete
 
   launch_template {
     id      = var.launch_template
     version = "$Latest"
   }
-  vpc_zone_identifier = var.sg_ids
+  vpc_zone_identifier = var.subnet_ids
 
   tag {
     key                 = "Name"
     value               = "tf-asg"
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "Project"
+    value               = var.project_tag
     propagate_at_launch = true
   }
 

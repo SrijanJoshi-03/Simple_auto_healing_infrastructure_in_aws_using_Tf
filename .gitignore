@@ -1,7 +1,9 @@
-# Local .terraform directories
+# Local Terraform working directories and caches
 **/.terraform/*
 
-# .tfstate files (They contain secrets and live state details)
+# State files (contain resource attributes / sensitive data) - kept out of git
+# because this repo uses an S3 backend (see backend.tf). If you switch to
+# local state, .gitignore already covers it below.
 *.tfstate
 *.tfstate.*
 
@@ -9,24 +11,22 @@
 crash.log
 crash.*
 
-# Exclude all variable files with actual values/secrets
-*.tfvars
-*.tfvars.json
+# Files that hold real/secret variable values.
+# NOTE: terraform.tfvars in THIS repo only contains an empty stub (all
+# variables have safe defaults in variable.tf) so it's safe to commit, but
+# any *.auto.tfvars or override files an operator creates locally should
+# stay untracked.
+*.auto.tfvars
+*.auto.tfvars.json
+secrets.tfvars
 
-# Override files if you use them locally
+# Local overrides
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Include a template if you want to show others what variables to fill out
-!example.tfvars
-
-backend.tf
-variable.tf
-version.tf
-terraform.tfvars
-.terraform.lock.hcl
-locals.tf
-output.tf
-varibles.tf
+# OS / editor junk
+.DS_Store
+.idea/
+.vscode/
