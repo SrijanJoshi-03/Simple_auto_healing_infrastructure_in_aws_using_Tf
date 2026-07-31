@@ -140,6 +140,8 @@ watch aws autoscaling describe-auto-scaling-groups \
   authenticates to ECR using its instance IAM role
   (`AmazonEC2ContainerRegistryReadOnly` — read-only, least privilege),
   pulls the image, and runs it with `--restart always`.
+  
+- Used Amazon ECR here instead of the suggested GHCR/Docker Hub, since the EC2 instance role can authenticate to it via IAM with no stored credentials — a small deviation from the brief, chosen for tighter AWS-native auth over sticking to a fully free registry.
 
 ## Alternative architectures considered
 
