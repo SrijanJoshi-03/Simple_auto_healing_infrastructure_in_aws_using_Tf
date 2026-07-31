@@ -3,3 +3,4 @@
 # change for your own AWS account, e.g.:
 #
 # ecr_account_id = "111122223333" # replace with the aws account id
+ecr_account_id = "123456789012"

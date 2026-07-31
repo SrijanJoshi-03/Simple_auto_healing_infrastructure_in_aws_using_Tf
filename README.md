@@ -141,6 +141,91 @@ watch aws autoscaling describe-auto-scaling-groups \
   (`AmazonEC2ContainerRegistryReadOnly` — read-only, least privilege),
   pulls the image, and runs it with `--restart always`.
 
+## Alternative architectures considered
+
+The brief is satisfied by the ASG + EC2 + Docker approach actually built
+here, but two other designs were considered and are worth documenting —
+both as evidence of the trade space explored, and as a roadmap for anyone
+extending this repo.
+
+### Option A: ECS on Fargate instead of ASG + EC2 + Docker
+
+Rather than launching EC2 instances that pull and run a container via
+user-data, the web tier could run as an **ECS service on Fargate**, with
+the ALB pointed at the service instead of at instance targets.
+
+**What would change:**
+- No EC2 instances, launch template, AMI, or SSH key pair — that whole
+  surface area (including the `tls_private_key`/`local_file` key-pair
+  generation this repo currently does) goes away entirely.
+- ALB target group type changes from `instance` to `ip` (Fargate tasks get
+  their own ENIs).
+- Self-healing moves from ASG + ELB-health-check to the **ECS service
+  scheduler**: same outcome (unhealthy task killed, replacement placed),
+  different owner.
+- New resources: `aws_ecs_cluster`, `aws_ecs_task_definition` (points at
+  the ECR image directly — no user-data pull step needed),
+  `aws_ecs_service` with `desired_count = 2`, plus
+  `deployment_minimum_healthy_percent` / `deployment_maximum_percent` for
+  rolling replacement.
+- IAM changes: a task execution role (ECR pull + CloudWatch Logs write)
+  replaces the EC2 instance profile.
+
+**Trade-offs vs. the current EC2 approach:**
+
+| | EC2 + ASG (current) | ECS Fargate |
+|---|---|---|
+| OS patching | your problem | AWS's problem (no OS to manage) |
+| Cold-start on replace | ~1–2 min (instance boot + user-data + docker pull) | ~30–60s (just an image pull, no OS boot) |
+| Cost at this scale | ~$17/mo compute (Free Tier eligible) | pricier per-vCPU/GB than t2.micro; no EBS or AMI management cost, but **no Fargate free tier** |
+| SSH access | yes, via key pair | no SSH — `ecs exec` only |
+| Complexity added | — | cluster, task definition, service, IP-target-group wiring, execution role, mandatory CloudWatch log group |
+| Budget impact | fits AUD 20 target only if destroyed after use | likely **increases** monthly cost relative to EC2, working against the AUD 20 budget noted below |
+
+A nice side effect worth calling out: removing EC2 entirely also removes
+the SSH key pair and its associated sensitive-file handling
+(`tls_private_key` / `local_file.private_key` written to disk) — one less
+secret to manage and gitignore correctly.
+
+### Option B: Baked (golden) AMI instead of stock AMI + user-data
+
+Instead of resolving the latest stock Amazon Linux 2023 AMI via SSM at
+launch time and installing Docker / pulling the image via user-data, a
+custom AMI could be pre-built (most commonly with **Packer**) that already
+has Docker installed and the application image either pre-pulled or baked
+directly into the filesystem.
+
+**What would change:**
+- The launch template's `image_id` would point at the custom AMI instead
+  of `data.aws_ssm_parameter.al2023_ami`'s `resolve:` value.
+- User-data shrinks to just `docker run` (or nothing at all, if the AMI
+  bakes in a systemd unit / `docker-compose` that starts on boot) — no
+  `dnf install docker`, no ECR login/pull at boot time.
+
+**Trade-offs:**
+
+| | Current (stock AMI + user-data) | Baked AMI |
+|---|---|---|
+| Boot-to-healthy time | slower — installs Docker and pulls the image on every single launch | faster — image already local, container just starts |
+| Always-latest AMI | yes, automatic via SSM `resolve:` | no — AMI lifecycle becomes something you own |
+| New pipeline needed | none | Packer build + a way to publish the new AMI id into the launch template (manual var bump, or CI) |
+| Best fit for | infrequent app changes, simplicity | frequent scale-out events, or when fast recovery time matters most |
+
+This option directly strengthens the "auto-healing" story: a scale-out or
+replacement event finishing in seconds rather than over a minute is a
+meaningfully better answer to "how fast does this heal?" — the trade-off
+is taking on AMI build/publish lifecycle in exchange.
+
+### Why neither was implemented here
+
+Both are legitimate improvements over the current design, but out of
+scope for this take-home given time constraints: Fargate is a bigger
+architectural rewrite (new resource types, new IAM model, cost profile
+that risks the budget target), and a baked-AMI pipeline needs a Packer
+build step and a publishing mechanism that don't exist yet. They're
+recorded here as the natural next iterations rather than implemented,
+so the trade-offs are visible even though the code isn't.
+
 ## Assumptions
 
 - Single region (`us-east-1`), two public subnets across two AZs — no NAT
@@ -182,3 +267,5 @@ an unrealistic figure.
 - No CloudWatch alarms/SNS notifications — self-healing relies solely on
   native ASG + ELB health checks, which is sufficient for the stated
   requirement but wouldn't page anyone.
+- ECS on Fargate and a baked-AMI launch path (see **Alternative
+  architectures considered**) are documented but not implemented.
