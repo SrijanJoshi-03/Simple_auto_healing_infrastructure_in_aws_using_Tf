@@ -115,7 +115,7 @@ variable "lb_sg_rules" {
 
 variable "key_pair_name" {
   type    = string
-  default = "terraform-key"
+  default = "my-ec2-key"
 }
 
 variable "asg" {
