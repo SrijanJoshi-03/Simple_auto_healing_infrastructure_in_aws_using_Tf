@@ -4,6 +4,3 @@
 #
 # ecr_account_id = "111122223333" # replace with the aws account id
 
-ecr_account_id = "182896147983"
-image_tag = "latest"
-image_name = "global360"
